@@ -24,6 +24,8 @@ int yminshooter = 550;
 int ymaxshooter = 600;
 int startshooter = 100;
 int endshooter = 150;
+int startturret = 100;
+int endturret = 108;
 
 void printPlane(int start, int end){
     for (y = ymin; y < ymin + 30; y++){
@@ -42,6 +44,20 @@ void printPlane(int start, int end){
 void printShooter(int startshooter, int endshooter){
     for (y = yminshooter; y < ymaxshooter; y++){
         for (x = startshooter; x < endshooter; x++) {
+
+            location = (x+vinfo.xoffset) * (vinfo.bits_per_pixel/8) +
+                       (y+vinfo.yoffset) * finfo.line_length;
+            *(fbp + location) = 255;        // Some blue
+            *(fbp + location + 1) = 15+(x-100)/2;     // A little green
+            *(fbp + location + 2) = 200-(y-100)/5;    // A lot of red
+            *(fbp + location + 3) = 0;      // No transparency
+        }
+    }
+}
+
+void printTurret(int startturret, int endturret){
+    for (y = ymin + 430; y < ymin + 438; y++){
+        for (x = startturret; x < endturret; x++) {
 
             location = (x+vinfo.xoffset) * (vinfo.bits_per_pixel/8) +
                        (y+vinfo.yoffset) * finfo.line_length;
@@ -109,6 +125,7 @@ int main()
 
     while (ymin != -20000){
         printShooter(startshooter,endshooter);
+        printTurret(startturret,endturret);
         printPlane(start,end);
 
         usleep(15000);
