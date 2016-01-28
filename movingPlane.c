@@ -2,6 +2,8 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <fcntl.h>
+#include <pthread.h>
+#include <unistd.h>
 #include <linux/fb.h>
 #include <sys/mman.h>
 #include <sys/ioctl.h>
@@ -24,6 +26,8 @@ int yminshooter = 550;
 int ymaxshooter = 600;
 int startshooter = 100;
 int endshooter = 150;
+
+pthread_t tid;
 
 void printPlane(int start, int end){
     for (y = ymin; y < ymin + 30; y++){
@@ -63,6 +67,31 @@ void clearScreen(){
             *(fbp + location + 1) = 0;
             *(fbp + location + 2) = 0;
             *(fbp + location + 3) = 0;
+        }
+    }
+}
+
+void* animatePlane(void* arg) {
+	while (ymin != -20000) {
+        printShooter(startshooter,endshooter);
+        printPlane(start,end);
+
+        usleep(15000);
+        clearScreen();
+        if (right == 1 ){
+            start += 3;
+            end += 3;
+            if (end == 600){
+                right = 0;
+                left = 1;
+            }
+        } else if (left == 1){
+            start -= 3;
+            end -= 3;
+            if (start == 100){
+                right = 1;
+                left = 0;
+            }
         }
     }
 }
@@ -107,28 +136,11 @@ int main()
     start = 100;
     end = start + 50;
 
-    while (ymin != -20000){
-        printShooter(startshooter,endshooter);
-        printPlane(start,end);
-
-        usleep(15000);
-        clearScreen();
-        if (right == 1 ){
-            start += 3;
-            end += 3;
-            if (end == 600){
-                right = 0;
-                left = 1;
-            }
-        } else if (left == 1){
-            start -= 3;
-            end -= 3;
-            if (start == 100){
-                right = 1;
-                left = 0;
-            }
-        }
-    }
+	pthread_create(&tid, NULL, &animatePlane, NULL);
+//	anim();
+	char c;
+	scanf("%c", &c);
+	printf("asdasd");
 
     munmap(fbp, screensize);
     close(fbfd);
